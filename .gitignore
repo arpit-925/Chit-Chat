@@ -37,9 +37,10 @@ dist-ssr
 # Environment variables
 .env
 .env.*
-!.env.example
-!.env.*.example
+.env.example
+.env.*.example
 
 # History/backup files
 .history/
 .vscode-history/
+generate-credentials.js
