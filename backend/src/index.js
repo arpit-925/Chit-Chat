@@ -19,6 +19,13 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// health check for render
+app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
+
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', PORT);
+
+
 // safe PORT fallback
 const PORT = process.env.PORT || 5000;
 
