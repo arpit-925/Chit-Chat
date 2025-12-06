@@ -34,5 +34,12 @@ dist-ssr
 .rts2_cache_cjs/
 .rts2_cache_es/
 
-
+# Environment variables
 .env
+.env.*
+!.env.example
+!.env.*.example
+
+# History/backup files
+.history/
+.vscode-history/
