@@ -13,7 +13,6 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
-  isSocketConnected: false,
 
   checkAuth: async () => {
     try {
@@ -37,7 +36,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Account created successfully");
       get().connectSocket();
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Failed to sign up");
+      toast.error(error.response.data.message);
     } finally {
       set({ isSigningUp: false });
     }
@@ -52,7 +51,7 @@ export const useAuthStore = create((set, get) => ({
 
       get().connectSocket();
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Failed to log in");
+      toast.error(error.response.data.message);
     } finally {
       set({ isLoggingIn: false });
     }
@@ -65,7 +64,7 @@ export const useAuthStore = create((set, get) => ({
       toast.success("Logged out successfully");
       get().disconnectSocket();
     } catch (error) {
-      toast.error(error.response?.data?.message || error.message || "Failed to logout");
+      toast.error(error.response.data.message);
     }
   },
 
@@ -73,58 +72,28 @@ export const useAuthStore = create((set, get) => ({
     set({ isUpdatingProfile: true });
     try {
       const res = await axiosInstance.put("/auth/update-profile", data);
-      if (!res.data) {
-        throw new Error("Invalid response from server");
-      }
       set({ authUser: res.data });
       toast.success("Profile updated successfully");
     } catch (error) {
       console.log("error in update profile:", error);
-      toast.error(error.response?.data?.message || error.message || "Failed to update profile");
+      toast.error(error.response.data.message);
     } finally {
       set({ isUpdatingProfile: false });
     }
   },
 
   connectSocket: () => {
-    const authUser = get().authUser;
-    
-    // Check if user exists
-    if (!authUser) return;
-    
-    // Check if socket already connected
-    if (get().socket?.connected) {
-      console.log("Socket already connected, skipping reconnection");
-      return;
-    }
-    
-    // Check if socket instance exists
-    if (get().socket) {
-      console.log("Socket instance exists, skipping creation");
-      return;
-    }
+    const { authUser } = get();
+    if (!authUser || get().socket?.connected) return;
 
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
       },
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
     });
+    socket.connect();
 
-    set({ socket: socket, isSocketConnected: false });
-
-    socket.on("connect", () => {
-      console.log("✅ Socket connected");
-      set({ isSocketConnected: true });
-    });
-
-    socket.on("disconnect", () => {
-      console.log("❌ Socket disconnected");
-      set({ isSocketConnected: false });
-    });
+    set({ socket: socket });
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
