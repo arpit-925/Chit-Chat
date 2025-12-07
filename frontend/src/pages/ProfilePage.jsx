@@ -10,17 +10,18 @@ const ProfilePage = () => {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
     // Validate file size (max 5MB)
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
       toast.error("Image must be less than 5MB");
       return;
     }
-if (!ALLOWED_TYPES.includes(file.type)) {
-    toast.error("Only JPG, PNG or WEBP images allowed");
-    return;
-  }
+if (!file.type || !file.type.startsWith("image/")) {
+  toast.error("Please select a valid image file");
+  return;
+}
+
     // Validate file type
     // if (!file.type.startsWith("image/")) {
     //   toast.error("Please select a valid image file");
