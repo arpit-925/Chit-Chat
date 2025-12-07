@@ -13,6 +13,7 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
+  isSocketConnected: false,
 
   checkAuth: async () => {
     try {
@@ -87,16 +88,43 @@ export const useAuthStore = create((set, get) => ({
 
   connectSocket: () => {
     const authUser = get().authUser;
-    if (!authUser || get().socket?.connected) return;
+    
+    // Check if user exists
+    if (!authUser) return;
+    
+    // Check if socket already connected
+    if (get().socket?.connected) {
+      console.log("Socket already connected, skipping reconnection");
+      return;
+    }
+    
+    // Check if socket instance exists
+    if (get().socket) {
+      console.log("Socket instance exists, skipping creation");
+      return;
+    }
 
     const socket = io(BASE_URL, {
       query: {
         userId: authUser._id,
       },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
     });
-    socket.connect();
 
-    set({ socket: socket });
+    set({ socket: socket, isSocketConnected: false });
+
+    socket.on("connect", () => {
+      console.log("✅ Socket connected");
+      set({ isSocketConnected: true });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+      set({ isSocketConnected: false });
+    });
 
     socket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
