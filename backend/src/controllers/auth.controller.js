@@ -94,44 +94,16 @@ export const updateProfile = async (req, res) => {
       return res.status(400).json({ message: "Profile pic is required" });
     }
 
-    // Validate image is base64 format
-    if (!profilePic.startsWith("data:image")) {
-      return res.status(400).json({ message: "Invalid image format" });
-    }
-
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      return res.status(400).json({ 
-        message: "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in .env file" 
-      });
-    }
-
-    let uploadResponse;
-    try {
-      uploadResponse = await cloudinary.uploader.upload(profilePic);
-    } catch (uploadError) {
-      console.log("Cloudinary upload error:", uploadError.message);
-      return res.status(400).json({ message: `Failed to upload image: ${uploadError.message}` });
-    }
-
-    // Validate upload response
-    if (!uploadResponse || !uploadResponse.secure_url) {
-      return res.status(400).json({ message: "Failed to get image URL from Cloudinary" });
-    }
-
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
       { new: true }
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("error in update profile:", error.message);
+    console.log("error in update profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
