@@ -19,6 +19,11 @@ const App = () => {
   const { theme } = useThemeStore();
 
   useEffect(() => {
+  document.documentElement.setAttribute("data-theme", theme);
+}, [theme]);
+
+
+  useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
@@ -30,7 +35,7 @@ const App = () => {
     );
 
   return (
-    <div data-theme={theme}>
+  
       <Navbar />
 
       <Routes>
