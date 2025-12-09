@@ -1,11 +1,28 @@
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
+import { useThemeStore } from "../store/useThemeStore";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
+
 
   return (
+    <>
+     <div className="flex gap-2 p-4">
+      <select
+        className="select select-bordered"
+        value={theme}
+        onChange={(e) => setTheme(e.target.value)}
+      >
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="coffee">Coffee</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="dracula">Dracula</option>
+      </select>
+    </div>
     <header
       className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 
     backdrop-blur-lg bg-base-100/80"
@@ -50,6 +67,7 @@ const Navbar = () => {
         </div>
       </div>
     </header>
+    </>
   );
 };
 export default Navbar;
